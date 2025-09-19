@@ -28,7 +28,9 @@ def update_vpn_root_config(port, client_ip):
         return f"Port {port} already configured"
     
     # Find the map section and add new mapping
-    map_pattern = r'(map \$arg_port \$backend_config \{[^}]+)(    # Add more as needed\n\})'
+    map_pattern = r'(map \$arg_sn \$backend_config \{[^}]+)(    # Add more as needed\n\})'
+
+
     
     match = re.search(map_pattern, content, re.DOTALL)
     if not match:
@@ -36,7 +38,8 @@ def update_vpn_root_config(port, client_ip):
         return "Error: Could not find map section"
     
     # Create new mapping line
-    new_mapping = f'    "{port}" "{client_ip}:9000";\n'
+    sn = payload.get('sn')
+    new_mapping = f'    "{sn}" "{client_ip}:9000";\n'
     
     # Insert new mapping before the comment line
     updated_content = content.replace(
@@ -79,6 +82,7 @@ def handle_device_request(payload):
     payload: dict with 'name', 'port', 'key'
     """
     port = payload.get('port')
+    sn = payload.get('name')
     name = payload.get('name')
     
     if not port or not name:
